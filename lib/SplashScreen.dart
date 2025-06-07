@@ -4,7 +4,6 @@ import 'Home.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
-
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
@@ -17,7 +16,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => Home()), // Corrigido
+          MaterialPageRoute(builder: (_) => Home()),
         );
       }
     });

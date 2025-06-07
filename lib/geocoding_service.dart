@@ -1,48 +1,36 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
-class Viagem {
-  final LatLng coordenadas;
-  final String nome;
-  final String endereco;
-  final String cidade;
-  final String estado;
-  final String pais;
-  final String cep;
-  final String? bairro;
-  final String? referencia;
+class GeocodingService {
+  static const nominatimUrl = 'https://nominatim.openstreetmap.org/reverse';
 
-  Viagem({
-    required this.coordenadas,
-    required this.nome,
-    required this.endereco,
-    required this.cidade,
-    required this.estado,
-    required this.pais,
-    required this.cep,
-    this.bairro,
-    this.referencia,
-  });
-
-  factory Viagem.fromJson(
-    Map<String, dynamic> json, {
-    required String nomePersonalizado,
-  }) {
-    final endereco = json['address'];
-
-    return Viagem(
-      coordenadas: LatLng(
-        double.parse(json['lat']),
-        double.parse(json['lon']),
-      ),
-      nome: nomePersonalizado,
-      endereco:
-          '${endereco['road'] ?? ''}, ${endereco['house_number'] ?? ''}'.trim(),
-      cidade: endereco['city'] ?? endereco['town'] ?? endereco['village'] ?? '',
-      estado: endereco['state'] ?? '',
-      pais: endereco['country'] ?? '',
-      cep: endereco['postcode'] ?? '',
-      bairro: endereco['suburb'] ?? endereco['neighbourhood'] ?? '',
-      referencia: endereco['amenity'] ?? endereco['building'] ?? '',
+  static Future<Map<String, dynamic>> getAddressFromCoordinates(
+      LatLng coords) async {
+    final response = await http.get(
+      Uri.parse(
+          '$nominatimUrl?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}'),
+      headers: {'User-Agent': 'YourAppName/1.0'}, // Necessário para Nominatim
     );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Falha ao obter endereço');
+    }
+  }
+
+  static Future<Map<String, dynamic>> getGoogleAddress(
+      LatLng coords, String apiKey) async {
+    final response = await http.get(
+      Uri.parse(
+          'https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&key=$apiKey'),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Falha ao obter endereço do Google');
+    }
   }
 }
